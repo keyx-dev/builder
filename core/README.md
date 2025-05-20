@@ -2,6 +2,17 @@
 
 `builder/core` is a package that provides the fundamental building blocks and tools for creating user interfaces. It offers capabilities for dynamically creating, parsing, and rendering UI components.
 
+## What can you use it for?
+
+This library is ideal for scenarios where you need to build dynamic user interfaces with a tree structure, making it easier to create applications like:
+
+- **Form builders:** Define and manage form structures and components programmatically.
+- **File tree builders:** Represent and render file system structures visually.
+- **Web page builders:** Create drag-and-drop interfaces for designing web pages.
+- **Mail designers:** Build visual editors for creating email templates.
+
+The core's ability to parse UI definitions into a node tree and render it with custom components provides the flexibility needed for these types of applications.
+
 ## Overview
 
 This package includes the following core modules:
