@@ -3,6 +3,8 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
   "scripts": {
     "dev": "storybook dev -p 6006",
     "build": "tsc -b && vite build",

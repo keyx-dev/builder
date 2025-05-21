@@ -1,11 +1,11 @@
 import { type FC, type ReactNode } from "react";
 import { Node } from "./node";
 
-export type BuilderNodeData = {
+export interface BuilderNodeData {
   type: string;
   children?: BuilderNodeData[];
   [key: string]: unknown;
-};
+}
 
 export type BuilderNode = Node<BuilderNodeData>;
 

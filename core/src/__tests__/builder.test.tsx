@@ -16,8 +16,10 @@ import {
 import React from "react";
 
 // Mock widget component for testing
-const MockWidget: React.FC<WidgetProps<BuilderNodeData>> = ({ node }) => (
-  <div data-testid={`widget-${node.data.type}`}>{node.data.text}</div>
+const MockWidget = ({
+  node,
+}: WidgetProps<BuilderNodeData>): React.ReactElement => (
+  <div data-testid={`widget-${node.data.type}`}>{node.data.text as string}</div>
 );
 
 // Mock provider component for testing
