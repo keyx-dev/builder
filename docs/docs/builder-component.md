@@ -20,8 +20,10 @@ function MyBuilderApp() {
 The Builder component accepts the following props:
 
 - `rootNode`: Of type `BuilderNode`, represents the root node of the tree to be built.
-- `widgets`: Of type `Widgets`, an object mapping node types to their corresponding React components.
-- `nodeProviders`: Optional, of type `Provider[]`, an array of providers that provide additional context or functionality to the nodes.
+- `onNodeUpdate`: A callback function of type `(changedNode: Node<BuilderNodeData>, type: ChangeType, details?: ChangeDetails<BuilderNodeData>) => void;` that is called when a node in the tree is updated.
+- `renderers`: Of type `RenderersMap`, an object mapping node types to their corresponding React components.
+- `propInjectors`: Optional, of type `PropInjector[]`, an array of components that can inject additional props into the rendered nodes.
+- `...restGlobalProps`: Any other props passed to the `Builder` component will be spread onto the `RecursiveNodeRenderer` and subsequently available to all custom renderers and prop injectors.
 
 ## Examples
 
@@ -50,24 +52,32 @@ const rootNode = parse({
   ],
 });
 
-const widgets = {
-  document: ({ node }) =>
-    node.children?.map((child) => (
-      <NodeRenderer node={child} key={child.id} />
-    )),
-  list: ({ node }) => (
+const renderers = {
+  document: ({ node, children }) => (
+    <div>
+      {children}
+    </div>
+  ),
+  list: ({ node, children }) => (
     <ul>
-      {node.children?.map((child) => (
-        <NodeRenderer node={child} key={child.id} />
-      ))}
+      {children}
     </ul>
   ),
   "list-item": ({ node }) => <li>{node.data.textContent as string}</li>,
 };
 
+const handleNodeUpdate = (changedNode, type, details) => {
+  console.log("Node updated:", changedNode.id, type, details);
+  // In a real application, you would update your state here
+};
+
 function ExampleBuilder() {
   return (
-    <Builder rootNode={rootNode} widgets={widgets} />
+    <Builder
+      rootNode={rootNode}
+      renderers={renderers}
+      onNodeUpdate={handleNodeUpdate}
+    />
   );
 }
 ```
