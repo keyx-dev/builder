@@ -1,34 +1,53 @@
-import { type FC, type ReactNode } from "react";
+import React from "react";
 import { Node } from "./node";
+import type { ChangeDetails, ChangeType } from "./node"; // Import as types
 
-export interface BuilderNodeData {
+export type { ChangeDetails, ChangeType }; // Export the types
+
+export interface BaseNodeData {
+  children?: BaseNodeData[];
+}
+
+export interface BuilderNodeData extends BaseNodeData {
   type: string;
   children?: BuilderNodeData[];
-  [key: string]: unknown;
+  dataPath?: string; // Add dataPath here
+  [key: string]: any;
 }
 
-export type BuilderNode = Node<BuilderNodeData>;
-
-export interface BaseWidgetProps {
-  node: BuilderNode;
-}
-
-export type WidgetProps<TData extends BuilderNodeData> = BaseWidgetProps & {
+export interface RendererProps<
+  TData extends BuilderNodeData = BuilderNodeData,
+> {
   node: Node<TData>;
-};
-
-export type Widgets<
-  ExtendedProps extends object = object,
-  TDataTypes extends BuilderNodeData = BuilderNodeData,
-> = {
-  [K in TDataTypes["type"]]?: React.ComponentType<
-    WidgetProps<Extract<TDataTypes, { type: K }>> & ExtendedProps
-  >;
-};
-
-export interface NodeProviderProps {
-  node: BuilderNode;
-  children: ReactNode;
+  children?: React.ReactNode;
+  [key: string]: any;
 }
 
-export type Provider = FC<NodeProviderProps>;
+export type RendererComponent<TData extends BuilderNodeData = BuilderNodeData> =
+  React.ComponentType<RendererProps<TData>>;
+
+export interface RenderersMap {
+  [type: string]: RendererComponent<any>;
+}
+
+export type PropInjector = React.ComponentType<{
+  node: Node<BuilderNodeData>;
+  children: React.ReactNode;
+  [key: string]: any;
+}>;
+
+export interface BuilderProps {
+  rootNode: Node<BuilderNodeData> | null;
+  onNodeUpdate: (
+    changedNode: Node<BuilderNodeData>,
+    type: ChangeType,
+    details?: ChangeDetails<BuilderNodeData>
+  ) => void;
+  renderers: RenderersMap;
+  propInjectors?: PropInjector[];
+
+  [key: string]: any;
+}
+
+export type BuilderNode<TData extends BuilderNodeData = BuilderNodeData> =
+  Node<TData>;

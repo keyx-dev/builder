@@ -1,20 +1,35 @@
-import { type StoryObj } from "@storybook/react";
-import { Builder, parse, type BuilderNode } from "..";
-import { NodeRenderer } from "../node-renderer";
-import { useState } from "react";
+import { memo, useState, type ReactNode } from "react";
+import type { BuilderNode, BuilderNodeData } from "../types";
+import { Builder } from "../builder";
+import type { Meta, StoryObj } from "@storybook/react";
+import { Render } from "./utils";
 import "./explorer.css";
 
-const meta = {
+const meta: Meta<typeof Builder> = {
   title: "Builder",
   component: Builder,
+  render: Render,
 };
-
 export default meta;
-type Story = StoryObj<typeof meta>;
+export type Story = StoryObj<typeof Builder>;
+
+interface ExplorerData extends BuilderNodeData {
+  name: string;
+  children: (FolderData | FileData)[];
+}
+
+interface FolderData extends BuilderNodeData {
+  name: string;
+  children?: (FolderData | FileData)[];
+}
+
+interface FileData extends BuilderNodeData {
+  name: string;
+}
 
 export const Explorer: Story = {
   args: {
-    rootNode: parse({
+    data: {
       type: "explorer",
       name: "Explorer",
       children: [
@@ -59,19 +74,27 @@ export const Explorer: Story = {
         { type: "file", name: "tailwind.config.ts" },
         { type: "file", name: "tsconfig.json" },
       ],
-    }),
-    widgets: {
-      explorer: ({ node }) => (
-        <ul>
-          <li>
-            <span>Explorer</span>
-            {node.children?.map((child) => (
-              <NodeRenderer node={child} key={child.id} />
-            ))}
-          </li>
-        </ul>
+    },
+    renderers: {
+      explorer: ({
+        node,
+        children,
+      }: {
+        node: BuilderNode<ExplorerData>;
+        children?: ReactNode;
+      }) => (
+        <>
+          <span>{node.data.name}</span>
+          <ul>{children}</ul>
+        </>
       ),
-      folder: function Folder({ node }) {
+      folder: memo(function Folder({
+        node,
+        children,
+      }: {
+        node: BuilderNode<FolderData>;
+        children?: ReactNode;
+      }) {
         const [collapsed, setCollapsed] = useState(true);
 
         return (
@@ -85,43 +108,34 @@ export const Explorer: Story = {
               <span className="glyphs">{collapsed ? "📁" : "📂"}</span>
               {node.data.name as string}
             </button>
-            {!collapsed && (
-              <ul>
-                {node.children?.map((child) => (
-                  <NodeRenderer node={child} key={child.id} />
-                ))}
-              </ul>
-            )}
+            {!collapsed && <ul>{children}</ul>}
           </li>
         );
-      },
-      file: ({ node }) => (
+      }),
+      file: memo(({ node }: { node: BuilderNode<FileData> }) => (
         <li>
           <span className="muted">{isLastChild(node) ? "└" : "├"} </span>
           <button
             onClick={() => {
-              alert(`Selected file: ${getPath(node)}`);
+              const newName = window.prompt("Change name", node.data.name);
+
+              if (newName) {
+                node.setData("name", newName);
+              }
             }}
           >
             <span className="glyphs">📄</span>
             {node.data.name as string}
           </button>
         </li>
-      ),
+      )),
     },
   },
 };
 
-const isLastChild = (node: BuilderNode) =>
-  node.parent!.children[node.parent!.children.length - 1] === node;
-
-const getPath = (node: BuilderNode) => {
-  const paths = [];
-  let currentNode: null | BuilderNode = node;
-  while (currentNode) {
-    paths.unshift(currentNode.data.name);
-    currentNode = currentNode.parent;
-  }
-
-  return paths.join("/");
-};
+const isLastChild = (
+  node:
+    | BuilderNode<ExplorerData>
+    | BuilderNode<FolderData>
+    | BuilderNode<FileData>
+) => node.parent!.children[node.parent!.children.length - 1] === node;

@@ -6,9 +6,10 @@ export type ChangeType =
   | "insertBefore"
   | "replaceChild"
   | "dataChanged"
-  | "childOrderChanged";
+  | "childOrderChanged"
+  | "descendantChanged";
 
-export type ChangeDetails<TData extends Record<string, unknown>> =
+export type ChangeDetails<TData extends NodeData> =
   | { type: "dataChanged"; key: keyof TData; value: TData[keyof TData] }
   | { type: "appendChild"; child: Node<TData> }
   | { type: "removeChild"; child: Node<TData> }
@@ -18,23 +19,30 @@ export type ChangeDetails<TData extends Record<string, unknown>> =
       referenceNode: Node<TData> | null;
     }
   | { type: "replaceChild"; newNode: Node<TData>; oldNode: Node<TData> }
-  | { type: "childOrderChanged" };
+  | { type: "childOrderChanged" }
+  | {
+      type: "descendantChanged";
+      originalChangeType: ChangeType;
+      changedNode: Node<TData>;
+      originalDetails?: ChangeDetails<TData>;
+    };
 
-export type NodeChangeListener<
-  TData extends Record<string, unknown> = Record<string, unknown>,
-> = (
+export type NodeChangeListener<TData extends NodeData> = (
   node: Node<TData>,
   type: ChangeType,
   details?: ChangeDetails<TData>
 ) => void;
 
-export type SerializedNode<T extends Record<string, unknown>> = T & {
+export type SerializedNode<T extends NodeData> = T & {
   children?: SerializedNode<T>[];
 };
 
-export class Node<
-  TData extends Record<string, unknown> = Record<string, unknown>,
-> {
+export interface NodeData {
+  children?: NodeData[];
+  [key: string]: any;
+}
+
+export class Node<TData extends NodeData = NodeData> {
   public readonly id: string;
   public data: TData;
   public parent: Node<TData> | null = null;
@@ -43,7 +51,9 @@ export class Node<
 
   constructor(data: TData) {
     this.id = `node-${nodeIdCounter++}`;
-    this.data = data;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { children, ...restData } = data;
+    this.data = restData as TData;
   }
 
   onChange(listener: NodeChangeListener<TData>): () => void {
@@ -58,9 +68,43 @@ export class Node<
     details?: ChangeDetails<TData>
   ): void {
     this.listeners.forEach((listener) => listener(this, type, details));
+    if (this.parent) {
+      if (
+        type === "descendantChanged" &&
+        details?.type === "descendantChanged"
+      ) {
+        // Eğer bu zaten bir 'descendantChanged' olayıysa ve detayları da öyleyse,
+        // orijinal olayı ve değişen düğümü yukarıya doğru aktar.
+        this.parent._notifyChange("descendantChanged", {
+          type: "descendantChanged",
+          originalChangeType: details.originalChangeType, // Orijinal tipi kullan
+          changedNode: details.changedNode, // Orijinal değişen düğümü kullan
+          originalDetails: details.originalDetails, // Orijinal detayları kullan
+        });
+      } else if (type !== "descendantChanged") {
+        // Eğer bu 'descendantChanged' olmayan bir olaysa, yeni bir 'descendantChanged' olayı oluştur.
+        this.parent._notifyChange("descendantChanged", {
+          type: "descendantChanged",
+          originalChangeType: type,
+          changedNode: this,
+          originalDetails: details,
+        });
+      }
+      // Eğer type zaten "descendantChanged" ise ve details.type "descendantChanged" değilse
+      // (bu durum normalde olmamalı ama bir güvenlik önlemi olarak),
+      // bu olayı yukarı yaymıyoruz çünkü zaten bir üst seviyeden gelmiş olabilir
+      // ve döngüye girmesini istemeyiz. Ancak yukarıdaki if/else if bu durumu kapsamalı.
+    }
   }
 
   setData<K extends keyof TData>(key: K, value: TData[K]): void {
+    if (key === "children") {
+      console.warn(
+        "Use Node manipulation methods (appendChild, removeChild, etc.) to modify children, not setData."
+      );
+      return;
+    }
+
     this.data[key] = value;
     this._notifyChange("dataChanged", { type: "dataChanged", key, value });
   }
@@ -200,7 +244,7 @@ export class Node<
   }
 
   clone(deep: boolean = false): Node<TData> {
-    const clonedData = JSON.parse(JSON.stringify(this.data)) as TData;
+    const clonedData = structuredClone(this.data) as TData;
     const clonedNode = new Node<TData>(clonedData);
 
     if (deep) {
@@ -219,7 +263,10 @@ export class Node<
 
     if (this.children.length > 0) {
       serialized.children = this.children.map((child) => child.toJSON());
+    } else {
+      delete (serialized as any).children;
     }
+
     return serialized;
   }
 }

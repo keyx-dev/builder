@@ -1,189 +1,279 @@
-import { describe, it, expect } from "vitest";
 import { Node } from "../node";
 
 describe("Node", () => {
-  it("should create a node with data and a unique ID", () => {
-    const data = { type: "div", text: "Hello" };
-    const node = new Node(data);
+  let rootNode: Node<any>;
+  let child1: Node<any>;
+  let child2: Node<any>;
+  let grandChild: Node<any>;
 
-    expect(node).toBeInstanceOf(Node);
-    expect(node.data).toEqual(data);
+  beforeEach(() => {
+    rootNode = new Node({ type: "root" });
+    child1 = new Node({ type: "child1", value: "A" });
+    child2 = new Node({ type: "child2", value: "B" });
+    grandChild = new Node({ type: "grandChild", value: "C" });
+
+    rootNode.appendChild(child1);
+    child1.appendChild(grandChild);
+    rootNode.appendChild(child2);
+  });
+
+  it("should initialize with correct data and id", () => {
+    const node = new Node({ type: "test", name: "myNode" });
+    expect(node.data).toEqual({ type: "test", name: "myNode" });
     expect(node.id).toMatch(/^node-\d+$/);
+    expect(node.parent).toBeNull();
+    expect(node.children).toEqual([]);
   });
 
-  it("should append a child node", () => {
-    const parent = new Node({ type: "parent" });
-    const child = new Node({ type: "child" });
+  it("should append a child correctly", () => {
+    const newChild = new Node({ type: "newChild" });
+    rootNode.appendChild(newChild);
 
-    parent.appendChild(child);
-
-    expect(parent.children).toHaveLength(1);
-    expect(parent.children[0]).toBe(child);
-    expect(child.parent).toBe(parent);
+    expect(rootNode.children).toContain(newChild);
+    expect(newChild.parent).toBe(rootNode);
+    expect(rootNode.children.length).toBe(3);
   });
 
-  it("should remove a child node", () => {
-    const parent = new Node({ type: "parent" });
-    const child = new Node({ type: "child" });
+  it("should remove a child correctly", () => {
+    rootNode.removeChild(child1);
 
-    parent.appendChild(child);
-    parent.removeChild(child);
-
-    expect(parent.children).toHaveLength(0);
-    expect(child.parent).toBeNull();
+    expect(rootNode.children).not.toContain(child1);
+    expect(child1.parent).toBeNull();
+    expect(rootNode.children.length).toBe(1);
+    expect(rootNode.children[0]).toBe(child2);
   });
 
-  it("should set data on a node", () => {
-    const node = new Node({ type: "div", text: "Hello" });
-    node.setData("text", "World");
+  it("should notify listeners on data change", () => {
+    const listener = vi.fn();
+    rootNode.onChange(listener);
 
-    expect(node.data.text).toBe("World");
+    rootNode.setData("value", "newRootValue");
+    expect(listener).toHaveBeenCalledWith(
+      rootNode,
+      "dataChanged",
+      expect.objectContaining({
+        type: "dataChanged",
+        key: "value",
+        value: "newRootValue",
+      })
+    );
+    expect(rootNode.data.value).toBe("newRootValue");
   });
 
-  it("should serialize a node to JSON", () => {
-    const parent = new Node({ type: "parent", id: "p1" });
-    const child1 = new Node({ type: "child", id: "c1" });
-    const child2 = new Node({ type: "child", id: "c2" });
+  it("should notify parent on descendant data change", () => {
+    const listener = vi.fn();
+    rootNode.onChange(listener);
 
-    parent.appendChild(child1);
-    parent.appendChild(child2);
+    grandChild.setData("value", "newGrandChildValue");
 
-    const json = parent.toJSON();
+    expect(listener).toHaveBeenCalledWith(
+      rootNode,
+      "descendantChanged",
+      expect.objectContaining({
+        type: "descendantChanged",
+        originalChangeType: "dataChanged",
+        changedNode: grandChild,
+        originalDetails: expect.objectContaining({
+          type: "dataChanged",
+          key: "value",
+          value: "newGrandChildValue",
+        }),
+      })
+    );
+  });
 
+  it("should notify parent on descendant appendChild", () => {
+    const listener = vi.fn();
+    rootNode.onChange(listener);
+
+    const newChildOfChild1 = new Node({ type: "newChildOfChild1" });
+    child1.appendChild(newChildOfChild1);
+
+    expect(listener).toHaveBeenCalledWith(
+      rootNode,
+      "descendantChanged",
+      expect.objectContaining({
+        type: "descendantChanged",
+        originalChangeType: "appendChild",
+        changedNode: child1,
+        originalDetails: expect.objectContaining({
+          type: "appendChild",
+          child: newChildOfChild1,
+        }),
+      })
+    );
+  });
+
+  it("should notify parent on descendant removeChild", () => {
+    const listener = vi.fn();
+    rootNode.onChange(listener);
+
+    child1.removeChild(grandChild);
+
+    expect(listener).toHaveBeenCalledWith(
+      rootNode,
+      "descendantChanged",
+      expect.objectContaining({
+        type: "descendantChanged",
+        originalChangeType: "removeChild",
+        changedNode: child1,
+        originalDetails: expect.objectContaining({
+          type: "removeChild",
+          child: grandChild,
+        }),
+      })
+    );
+  });
+
+  it("should notify parent on descendant insertBefore", () => {
+    const listener = vi.fn();
+    rootNode.onChange(listener);
+
+    const newChildOfChild1 = new Node({ type: "newChildOfChild1" });
+    child1.insertBefore(newChildOfChild1, grandChild);
+
+    expect(listener).toHaveBeenCalledWith(
+      rootNode,
+      "descendantChanged",
+      expect.objectContaining({
+        type: "descendantChanged",
+        originalChangeType: "insertBefore",
+        changedNode: child1,
+        originalDetails: expect.objectContaining({
+          type: "insertBefore",
+          newNode: newChildOfChild1,
+          referenceNode: grandChild,
+        }),
+      })
+    );
+  });
+
+  it("should notify parent on descendant replaceChild", () => {
+    const listener = vi.fn();
+    rootNode.onChange(listener);
+
+    const replacementNode = new Node({ type: "replacement" });
+    child1.replaceChild(replacementNode, grandChild);
+
+    expect(listener).toHaveBeenCalledWith(
+      rootNode,
+      "descendantChanged",
+      expect.objectContaining({
+        type: "descendantChanged",
+        originalChangeType: "replaceChild",
+        changedNode: child1,
+        originalDetails: expect.objectContaining({
+          type: "replaceChild",
+          newNode: replacementNode,
+          oldNode: grandChild,
+        }),
+      })
+    );
+  });
+
+  it("should return previous sibling", () => {
+    expect(child2.prev).toBe(child1);
+    expect(child1.prev).toBeNull();
+  });
+
+  it("should return next sibling", () => {
+    expect(child1.next).toBe(child2);
+    expect(child2.next).toBeNull();
+  });
+
+  it("should return all siblings", () => {
+    expect(child1.siblings).toEqual([child2]);
+    expect(child2.siblings).toEqual([child1]);
+    expect(grandChild.siblings).toEqual([]);
+  });
+
+  it("should remove node from its parent", () => {
+    child1.remove();
+    expect(rootNode.children).not.toContain(child1);
+    expect(child1.parent).toBeNull();
+  });
+
+  it("should insert a new node before a reference node", () => {
+    const newNode = new Node({ type: "newNode" });
+    rootNode.insertBefore(newNode, child2);
+    expect(rootNode.children[1]).toBe(newNode);
+    expect(newNode.parent).toBe(rootNode);
+  });
+
+  it("should insert a new node at the end if reference node is null", () => {
+    const newNode = new Node({ type: "newNode" });
+    rootNode.insertBefore(newNode, null);
+    expect(rootNode.children[rootNode.children.length - 1]).toBe(newNode);
+    expect(newNode.parent).toBe(rootNode);
+  });
+
+  it("should replace a child node", () => {
+    const replacementNode = new Node({ type: "replacement" });
+    rootNode.replaceChild(replacementNode, child1);
+    expect(rootNode.children).toContain(replacementNode);
+    expect(rootNode.children).not.toContain(child1);
+    expect(replacementNode.parent).toBe(rootNode);
+    expect(child1.parent).toBeNull();
+  });
+
+  it("should clone a node (shallow)", () => {
+    const clonedNode = rootNode.clone();
+    expect(clonedNode.data).toEqual(rootNode.data);
+    expect(clonedNode.id).not.toBe(rootNode.id);
+    expect(clonedNode.children).toEqual([]); // Shallow clone, no children
+    expect(clonedNode.parent).toBeNull();
+  });
+
+  it("should clone a node (deep)", () => {
+    const clonedNode = rootNode.clone(true);
+    expect(clonedNode.data).toEqual(rootNode.data);
+    expect(clonedNode.id).not.toBe(rootNode.id);
+    expect(clonedNode.children.length).toBe(rootNode.children.length);
+    expect(clonedNode.children[0].data).toEqual(rootNode.children[0].data);
+    expect(clonedNode.children[0].id).not.toBe(rootNode.children[0].id);
+    expect(clonedNode.children[0].parent).toBe(clonedNode);
+    expect(clonedNode.children[0].children[0].data).toEqual(
+      rootNode.children[0].children[0].data
+    );
+    expect(clonedNode.children[0].children[0].id).not.toBe(
+      rootNode.children[0].children[0].id
+    );
+    expect(clonedNode.children[0].children[0].parent).toBe(
+      clonedNode.children[0]
+    );
+  });
+
+  it("should serialize node to JSON", () => {
+    const json = rootNode.toJSON();
     expect(json).toEqual({
-      type: "parent",
-      id: "p1",
+      type: "root",
       children: [
-        { type: "child", id: "c1" },
-        { type: "child", id: "c2" },
+        {
+          type: "child1",
+          value: "A",
+          children: [{ type: "grandChild", value: "C" }],
+        },
+        { type: "child2", value: "B" },
       ],
     });
   });
 
-  it("should insert a node before a reference node", () => {
-    const parent = new Node({ type: "parent" });
-    const child1 = new Node({ type: "child1" });
-    const child2 = new Node({ type: "child2" });
-    const child3 = new Node({ type: "child3" });
-
-    parent.appendChild(child1);
-    parent.appendChild(child3);
-    parent.insertBefore(child2, child3);
-
-    expect(parent.children).toEqual([child1, child2, child3]);
-    expect(child2.parent).toBe(parent);
+  it("should not include children property if no children", () => {
+    const node = new Node({ type: "single" });
+    const json = node.toJSON();
+    expect(json).toEqual({ type: "single" });
+    expect(json).not.toHaveProperty("children");
   });
 
-  it("should insert a node at the end if reference node is null", () => {
-    const parent = new Node({ type: "parent" });
-    const child1 = new Node({ type: "child1" });
-    const child2 = new Node({ type: "child2" });
-
-    parent.appendChild(child1);
-    parent.insertBefore(child2, null);
-
-    expect(parent.children).toEqual([child1, child2]);
-    expect(child2.parent).toBe(parent);
-  });
-
-  it("should replace a child node", () => {
-    const parent = new Node({ type: "parent" });
-    const oldChild = new Node({ type: "old" });
-    const newChild = new Node({ type: "new" });
-
-    parent.appendChild(oldChild);
-    parent.replaceChild(newChild, oldChild);
-
-    expect(parent.children).toHaveLength(1);
-    expect(parent.children[0]).toBe(newChild);
-    expect(newChild.parent).toBe(parent);
-    expect(oldChild.parent).toBeNull();
-  });
-
-  it("should get previous and next siblings", () => {
-    const parent = new Node({ type: "parent" });
-    const child1 = new Node({ type: "child1" });
-    const child2 = new Node({ type: "child2" });
-    const child3 = new Node({ type: "child3" });
-
-    parent.appendChild(child1);
-    parent.appendChild(child2);
-    parent.appendChild(child3);
-
-    expect(child1.prev).toBeNull();
-    expect(child1.next).toBe(child2);
-
-    expect(child2.prev).toBe(child1);
-    expect(child2.next).toBe(child3);
-
-    expect(child3.prev).toBe(child2);
-    expect(child3.next).toBeNull();
-  });
-
-  it("should get all siblings", () => {
-    const parent = new Node({ type: "parent" });
-    const child1 = new Node({ type: "child1" });
-    const child2 = new Node({ type: "child2" });
-    const child3 = new Node({ type: "child3" });
-
-    parent.appendChild(child1);
-    parent.appendChild(child2);
-    parent.appendChild(child3);
-
-    expect(child1.siblings).toEqual([child2, child3]);
-    expect(child2.siblings).toEqual([child1, child3]);
-    expect(child3.siblings).toEqual([child1, child2]);
-  });
-
-  it("should insert a node before the current node", () => {
-    const parent = new Node({ type: "parent" });
-    const child1 = new Node({ type: "child1" });
-    const child2 = new Node({ type: "child2" });
-
-    parent.appendChild(child2);
-    child2.before(child1);
-
-    expect(parent.children).toEqual([child1, child2]);
-    expect(child1.parent).toBe(parent);
-  });
-
-  it("should insert a node after the current node", () => {
-    const parent = new Node({ type: "parent" });
-    const child1 = new Node({ type: "child1" });
-    const child2 = new Node({ type: "child2" });
-
-    parent.appendChild(child1);
-    child1.after(child2);
-
-    expect(parent.children).toEqual([child1, child2]);
-    expect(child2.parent).toBe(parent);
-  });
-
-  it("should clone a node (shallow)", () => {
-    const parent = new Node({ type: "parent", id: "p1" });
-    const child = new Node({ type: "child", id: "c1" });
-    parent.appendChild(child);
-
-    const clonedParent = parent.clone();
-
-    expect(clonedParent.data).toEqual(parent.data);
-    expect(clonedParent.id).not.toBe(parent.id); // Should have a new ID
-    expect(clonedParent.children).toHaveLength(0); // Shallow clone
-    expect(clonedParent.parent).toBeNull();
-  });
-
-  it("should clone a node (deep)", () => {
-    const parent = new Node({ type: "parent", id: "p1" });
-    const child = new Node({ type: "child", id: "c1" });
-    parent.appendChild(child);
-
-    const clonedParent = parent.clone(true);
-
-    expect(clonedParent.data).toEqual(parent.data);
-    expect(clonedParent.id).not.toBe(parent.id); // Should have a new ID
-    expect(clonedParent.children).toHaveLength(1); // Deep clone
-    expect(clonedParent.children[0].data).toEqual(child.data);
-    expect(clonedParent.children[0].id).not.toBe(child.id); // Should have a new ID
-    expect(clonedParent.children[0].parent).toBe(clonedParent);
+  it("should handle setData for children key with warning", () => {
+    const consoleWarnSpy = vi
+      .spyOn(console, "warn")
+      .mockImplementation(() => {});
+    rootNode.setData("children" as any, [{ type: "newChildData" }]);
+    expect(consoleWarnSpy).toHaveBeenCalledWith(
+      "Use Node manipulation methods (appendChild, removeChild, etc.) to modify children, not setData."
+    );
+    expect(rootNode.data).not.toHaveProperty("children"); // Ensure children property is not set on data
+    consoleWarnSpy.mockRestore();
   });
 });

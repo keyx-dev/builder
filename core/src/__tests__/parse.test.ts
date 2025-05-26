@@ -1,86 +1,100 @@
-import { describe, it, expect } from "vitest";
-import { parse } from "../parse";
 import { Node } from "../node";
+import { parseJsonToNode } from "../utils";
+import type { BuilderNodeData } from "../types";
 
-describe("parse", () => {
-  it("should parse a valid JSON object into a Node tree", () => {
-    const json = {
-      type: "div",
-      id: "d1",
-      children: [
-        { type: "span", id: "s1", text: "Hello" },
-        { type: "span", id: "s2", text: "World" },
-      ],
-    };
-
-    const node = parse(json);
+describe("parseJsonToNode", () => {
+  it("should parse a simple JSON object into a Node", () => {
+    const jsonData: BuilderNodeData = { type: "text", text: "Hello" };
+    const node = parseJsonToNode(jsonData);
 
     expect(node).toBeInstanceOf(Node);
-    expect(node.data.type).toBe("div");
-    expect(node.children).toHaveLength(2);
+    expect(node.data).toEqual({ type: "text", text: "Hello" });
+    expect(node.children).toEqual([]);
+    expect(node.parent).toBeNull();
+  });
 
-    const child1 = node.children[0];
+  it("should parse JSON with nested children into a Node tree", () => {
+    const jsonData: BuilderNodeData = {
+      type: "container",
+      children: [
+        { type: "text", text: "Child 1" },
+        {
+          type: "container",
+          children: [{ type: "text", text: "Grandchild 1" }],
+        },
+      ],
+    };
+    const rootNode = parseJsonToNode(jsonData);
+
+    expect(rootNode).toBeInstanceOf(Node);
+    expect(rootNode.data).toEqual({ type: "container" });
+    expect(rootNode.children.length).toBe(2);
+
+    const child1 = rootNode.children[0];
     expect(child1).toBeInstanceOf(Node);
-    expect(child1.data.type).toBe("span");
-    expect(child1.data.text).toBe("Hello");
-    expect(child1.parent).toBe(node);
+    expect(child1.data).toEqual({ type: "text", text: "Child 1" });
+    expect(child1.parent).toBe(rootNode);
+    expect(child1.children).toEqual([]);
 
-    const child2 = node.children[1];
+    const child2 = rootNode.children[1];
     expect(child2).toBeInstanceOf(Node);
-    expect(child2.data.type).toBe("span");
-    expect(child2.data.text).toBe("World");
-    expect(child2.parent).toBe(node);
-  });
+    expect(child2.data).toEqual({ type: "container" });
+    expect(child2.parent).toBe(rootNode);
+    expect(child2.children.length).toBe(1);
 
-  it("should throw an error for invalid JSON object (missing type)", () => {
-    const json = {
-      id: "d1",
-      children: [],
-    };
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect(() => parse(json as any)).toThrow(
-      "Invalid JSON object: 'type' property is missing or not a string."
-    );
-  });
-
-  it("should throw an error for invalid JSON object (type not a string)", () => {
-    const json = {
-      type: 123,
-      id: "d1",
-      children: [],
-    };
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect(() => parse(json as any)).toThrow(
-      "Invalid JSON object: 'type' property is missing or not a string."
-    );
+    const grandChild1 = child2.children[0];
+    expect(grandChild1).toBeInstanceOf(Node);
+    expect(grandChild1.data).toEqual({ type: "text", text: "Grandchild 1" });
+    expect(grandChild1.parent).toBe(child2);
+    expect(grandChild1.children).toEqual([]);
   });
 
   it("should handle empty children array", () => {
-    const json = {
-      type: "div",
-      id: "d1",
+    const jsonData: BuilderNodeData = {
+      type: "container",
       children: [],
     };
-
-    const node = parse(json);
+    const node = parseJsonToNode(jsonData);
 
     expect(node).toBeInstanceOf(Node);
-    expect(node.data.type).toBe("div");
-    expect(node.children).toHaveLength(0);
+    expect(node.data).toEqual({ type: "container" });
+    expect(node.children).toEqual([]);
   });
 
-  it("should handle missing children property", () => {
-    const json = {
-      type: "div",
-      id: "d1",
+  it("should handle additional properties in node data", () => {
+    const jsonData: BuilderNodeData = {
+      type: "custom",
+      id: "123",
+      props: { color: "red" },
     };
+    const node = parseJsonToNode(jsonData);
 
-    const node = parse(json);
+    expect(node.data).toEqual({
+      type: "custom",
+      id: "123",
+      props: { color: "red" },
+    });
+  });
 
-    expect(node).toBeInstanceOf(Node);
-    expect(node.data.type).toBe("div");
-    expect(node.children).toHaveLength(0);
+  it("should correctly set parent references for all nodes", () => {
+    const jsonData: BuilderNodeData = {
+      type: "root",
+      children: [
+        {
+          type: "childA",
+          children: [{ type: "grandchildA" }],
+        },
+        { type: "childB" },
+      ],
+    };
+    const rootNode = parseJsonToNode(jsonData);
+
+    const childA = rootNode.children[0];
+    const grandchildA = childA.children[0];
+    const childB = rootNode.children[1];
+
+    expect(childA.parent).toBe(rootNode);
+    expect(grandchildA.parent).toBe(childA);
+    expect(childB.parent).toBe(rootNode);
   });
 });

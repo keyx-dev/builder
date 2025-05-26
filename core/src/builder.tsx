@@ -1,45 +1,47 @@
-import { useContext, createContext } from "react";
-import type { BuilderNode, Provider, Widgets } from "./types";
-import { NodeRenderer } from "./node-renderer";
+import React, { useEffect } from "react";
+import type { BuilderProps } from "./types";
+import { RecursiveNodeRenderer } from "./recursive-node-renderer";
 
-export interface BuilderContextType {
-  rootNode: BuilderNode;
-  widgets: Widgets;
-  nodeProviders: Provider[];
-}
-
-export const BuilderContext = createContext<BuilderContextType | null>(null);
-
-export function useBuilderContext() {
-  const context = useContext(
-    BuilderContext as React.Context<BuilderContextType | null>
-  );
-  if (!context) {
-    throw new Error("useBuilderContext must be used within a BuilderProvider");
-  }
-  return context;
-}
-
-export interface BuilderProps {
-  rootNode: BuilderNode;
-  widgets: Widgets;
-  nodeProviders?: Provider[];
-}
-
-export function Builder({
+export const Builder: React.FC<BuilderProps> = ({
   rootNode,
-  widgets,
-  nodeProviders = [],
-}: BuilderProps) {
+  onNodeUpdate,
+  renderers,
+  propInjectors = [],
+  ...restGlobalProps
+}) => {
+  useEffect(() => {
+    if (!rootNode) return;
+
+    const unlisten = rootNode.onChange((node, type, details) => {
+      if (
+        type === "descendantChanged" &&
+        details?.type === "descendantChanged"
+      ) {
+        onNodeUpdate(
+          details.changedNode,
+          details.originalChangeType,
+          details.originalDetails
+        );
+      } else {
+        onNodeUpdate(node, type, details);
+      }
+    });
+
+    return () => {
+      unlisten();
+    };
+  }, [rootNode, onNodeUpdate]);
+
+  if (!rootNode) {
+    return null;
+  }
+
   return (
-    <BuilderContext.Provider
-      value={{
-        rootNode,
-        widgets,
-        nodeProviders,
-      }}
-    >
-      <NodeRenderer node={rootNode} key={rootNode.id} />
-    </BuilderContext.Provider>
+    <RecursiveNodeRenderer
+      node={rootNode}
+      renderers={renderers}
+      propInjectors={propInjectors}
+      {...restGlobalProps} // formData vs. buraya yayılır
+    />
   );
-}
+};

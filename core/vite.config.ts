@@ -1,12 +1,10 @@
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-// https://vite.dev/config/
-export default defineConfig({
+export default {
   plugins: [react()],
   test: {
     setupFiles: ["./src/__tests__/setupTests.ts"],
@@ -21,4 +19,4 @@ export default defineConfig({
     },
     sourcemap: true,
   },
-});
+};

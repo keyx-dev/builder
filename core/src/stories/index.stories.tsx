@@ -1,48 +1,48 @@
-import { type StoryObj } from "@storybook/react";
-import { Builder, parse } from "..";
-import { NodeRenderer } from "../node-renderer";
+import { type Meta, type StoryObj } from "@storybook/react";
+import { Builder } from "../builder";
+import type { BuilderNodeData, RendererProps } from "../types";
+import "./explorer.css";
+import { Render } from "./utils";
 
-const meta = {
+const meta: Meta<typeof Builder> = {
   title: "Builder",
   component: Builder,
+  render: Render,
 };
 
 export default meta;
-type Story = StoryObj<typeof meta>;
+
+export type Story = StoryObj<typeof Builder>;
 
 export const Default: Story = {
   args: {
-    rootNode: parse({
-      type: "document",
+    data: {
+      type: "list",
       children: [
         {
-          type: "list",
-          children: [
-            {
-              type: "list-item",
-              textContent: "item 1",
-            },
-            {
-              type: "list-item",
-              textContent: "item 2",
-            },
-          ],
+          type: "item",
+          content: "1",
+        },
+        {
+          type: "item",
+          content: "2",
         },
       ],
-    }),
-    widgets: {
-      document: ({ node }) =>
-        node.children?.map((child) => (
-          <NodeRenderer node={child} key={child.id} />
-        )),
-      list: ({ node }) => (
-        <ul>
-          {node.children?.map((child) => (
-            <NodeRenderer node={child} key={child.id} />
-          ))}
-        </ul>
-      ),
-      "list-item": ({ node }) => <li>{node.data.textContent as string}</li>,
+    },
+    renderers: {
+      list: ({ children }) => {
+        return <ul>{children}</ul>;
+      },
+      item: ({
+        node,
+      }: RendererProps<BuilderNodeData & { content: string }>) => {
+        return (
+          <li>
+            <span>{node.data.content}</span>{" "}
+            <button onClick={() => node.remove()}>remove</button>
+          </li>
+        );
+      },
     },
   },
 };
