@@ -1,0 +1,27 @@
+.fieldset {
+  max-width: 300px;
+  margin: auto;
+  font-family: sans-serif;
+  padding: 1rem;
+}
+
+.fieldList > * {
+  margin-bottom: 1rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+}
+
+.alert {
+  color: red;
+}
+
+.field input[type="text"] {
+  padding: 0.2rem;
+}
+
+.field span {
+  font-size: 0.9rem;
+}

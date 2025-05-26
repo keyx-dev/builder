@@ -1,0 +1,434 @@
+.fieldset {
+  max-width: 500px;
+  margin: 20px auto;
+  padding: 20px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  background-color: #ffffff;
+}
+
+.legend {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+  padding: 0 10px;
+  margin-left: -10px;
+}
+
+.fieldList > * {
+  margin-bottom: 18px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.field label {
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.field input[type="text"],
+.field input[type="email"],
+.field input[type="number"],
+.field input[type="password"],
+.field select {
+  padding: 10px 12px;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  font-size: 1rem;
+  color: #333;
+  transition:
+    border-color 0.2s ease-in-out,
+    box-shadow 0.2s ease-in-out;
+  width: 100%;
+  box-sizing: border-box; /* Padding'in genişliği etkilememesi için */
+}
+
+.field input:focus,
+.field select:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+  outline: none;
+}
+
+.field input.error,
+.field select.error {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25);
+}
+
+.alert {
+  color: #dc3545;
+  font-size: 0.85rem;
+  margin-top: 4px; /* Hata mesajları için alt boşluk */
+  display: block;
+}
+
+/* Required işareti için stil */
+.requiredStar {
+  color: #dc3545;
+  margin-left: 4px;
+  font-size: 0.9rem;
+  vertical-align: top; /* Label ile aynı hizada tutmak için */
+}
+
+.description {
+  font-size: 0.85rem;
+  color: #777;
+  margin-top: 4px;
+}
+
+.fieldRow {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 18px;
+}
+
+.fieldRow > .field {
+  flex: 1;
+  margin-bottom: 0; /* İç içe field'ların margin'ini sıfırla */
+}
+
+.checkboxGroup,
+.radioGroup {
+  margin-top: 10px;
+}
+
+.checkboxGroup label,
+.radioGroup label {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  cursor: pointer;
+  font-weight: normal;
+  color: #333;
+}
+
+.checkboxGroup input[type="checkbox"],
+.radioGroup input[type="radio"] {
+  margin-right: 8px;
+  width: 18px;
+  height: 18px;
+  accent-color: #007bff; /* Checkbox/radio rengi */
+}
+
+.button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition:
+    background-color 0.2s ease-in-out,
+    box-shadow 0.2s ease-in-out;
+  margin-top: 10px;
+}
+
+.button:hover {
+  background-color: #0056b3;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.arrayItem {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+  background-color: #f9f9f9;
+  position: relative;
+}
+
+.arrayItem h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.arrayItem button {
+  background-color: #dc3545;
+  margin-top: 10px;
+}
+
+.arrayItem button:hover {
+  background-color: #c82333;
+}
+
+.arrayFieldContainer {
+  border: 1px dashed #a0a0a0;
+  padding: 20px;
+  margin-top: 20px;
+  border-radius: 8px;
+  background-color: #fdfdfd;
+}
+
+.arrayFieldContainer h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #888;
+}
+
+.inputWithIcon {
+  padding-right: 35px; /* İkon için boşluk bırak */
+}
+
+.promoCodeField {
+  position: relative;
+}
+
+.promoCodeField .icon {
+  color: #28a745; /* Yeşil tik işareti */
+}
+
+.checkboxField {
+  display: flex;
+  align-items: center;
+  margin-top: 15px;
+}
+
+.checkboxField label {
+  margin-bottom: 0;
+  margin-left: 8px;
+  font-weight: normal;
+  color: #333;
+}
+
+.checkboxField input[type="checkbox"] {
+  margin-right: 0;
+}
+
+.placeOrderButton {
+  background-color: #007bff;
+  color: white;
+  padding: 12px 25px;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease-in-out,
+    box-shadow 0.2s ease-in-out;
+  margin-top: 20px;
+}
+
+.placeOrderButton:hover {
+  background-color: #0056b3;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.buttonContainer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+  gap: 10px; /* Add gap between buttons */
+}
+
+/* Multi-step form specific styles */
+.multiStepHeader {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 30px;
+  padding: 15px 0;
+  background-color: #f8f8f8;
+  border-bottom: 1px solid #e0e0e0;
+  border-radius: 8px 8px 0 0;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  color: #888;
+  font-weight: 500;
+  position: relative;
+  padding: 0 10px;
+}
+
+.step:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 20px;
+  right: -50px; /* Adjust as needed for spacing */
+  width: 100px; /* Length of the line */
+  height: 2px;
+  background-color: #e0e0e0;
+  z-index: -1;
+}
+
+.stepNumber {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: #e0e0e0;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1rem;
+  margin-bottom: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.stepTitle {
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.activeStep .stepNumber {
+  background-color: #6a38ed; /* Active step color */
+}
+
+.activeStep {
+  color: #6a38ed; /* Active step text color */
+}
+
+.completedStep .stepNumber {
+  background-color: #28a745; /* Completed step color */
+}
+
+.completedStep .stepTitle {
+  color: #28a745; /* Completed step text color */
+}
+
+.completedStep .completedIcon {
+  color: #28a745;
+  font-size: 1.5rem;
+  margin-bottom: 8px;
+}
+
+.radioOption {
+  display: flex;
+  align-items: flex-start; /* Align items to the start for multi-line content */
+  margin-bottom: 12px;
+  padding: 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.2s ease-in-out;
+}
+
+.radioOption:hover {
+  border-color: #007bff;
+}
+
+.radioOption input[type="radio"] {
+  margin-top: 4px; /* Adjust alignment for radio button */
+  flex-shrink: 0; /* Prevent radio button from shrinking */
+}
+
+.radioOption div {
+  margin-left: 10px;
+}
+
+.radioOption strong {
+  display: block; /* Ensure label is on its own line */
+  font-size: 1rem;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.radioOption p {
+  font-size: 0.85rem;
+  color: #555;
+  margin: 0;
+}
+
+.hourlyRate {
+  font-size: 0.8rem;
+  color: #777;
+  background-color: #f0f0f0;
+  padding: 3px 8px;
+  border-radius: 4px;
+  display: inline-block;
+  margin-top: 5px;
+}
+
+.fileUploadField {
+  margin-top: 20px;
+}
+
+.fileUploadBox {
+  border: 2px dashed #e0e0e0;
+  border-radius: 8px;
+  padding: 30px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s ease-in-out;
+}
+
+.fileUploadBox:hover {
+  border-color: #6a38ed;
+}
+
+.hiddenInput {
+  display: none;
+}
+
+.fileUploadLabel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 0.9rem;
+  color: #6a38ed;
+  font-weight: 500;
+}
+
+.uploadIcon {
+  margin-bottom: 10px;
+}
+
+.fileName {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.successMessageContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  margin-top: 30px;
+}
+
+.successIcon {
+  margin-bottom: 20px;
+}
+
+.successMessageContainer h2 {
+  font-size: 1.8rem;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.successMessageContainer p {
+  font-size: 1rem;
+  color: #555;
+  max-width: 400px;
+  line-height: 1.5;
+}
