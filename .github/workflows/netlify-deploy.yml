@@ -52,4 +52,6 @@ jobs:
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
           NETLIFY_DEPLOY_MESSAGE: "Deploy from push ${GITHUB_SHA}"
           NETLIFY_DEPLOY_TO_PROD: true
+          build_command: pnpm build-storybook # Storybook'u build etme komutu
           build_directory: form-builder/storybook-static # Statik sitenin klasörü
+          monorepo_package: form-builder # Monorepo paket adı
