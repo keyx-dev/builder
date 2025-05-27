@@ -47,7 +47,7 @@ jobs:
 
       # 6. pnpm install çalıştır
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --no-lockfile
 
       # 7. Storybook'u build et
       - name: Build Storybook
