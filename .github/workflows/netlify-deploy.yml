@@ -27,20 +27,14 @@ jobs:
       - name: Create pnpm-workspace.yaml
         run: |
           if [ ! -f pnpm-workspace.yaml ]; then
-            cat > pnpm-workspace.yaml << EOL
-            packages:
-              - core
-              - form-builder
-            EOL
+            echo -e "packages:\n  - core\n  - form-builder" > pnpm-workspace.yaml
           fi
 
       # 5. package.json dosyasını oluştur
       - name: Create package.json
         run: |
           if [ ! -f package.json ]; then
-            cat > package.json << EOL
-            {}
-            EOL
+            echo -e "{}" > package.json
           fi
 
       # 6. pnpm install çalıştır
