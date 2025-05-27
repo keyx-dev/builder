@@ -15,6 +15,7 @@ import styles from "./advanced-form.module.css"; // Reusing the advanced-form st
 import React, { useState } from "react";
 import { FaCheckCircle } from "react-icons/fa"; // For step completion icons
 import type { FormFieldState } from "../types"; // Import FormFieldState
+import { advancedRenderers } from "./advanced-form-renderers"; // Import advancedRenderers from new file
 
 const meta: Meta<typeof FormBuilder> = {
   title: "FormBuilder/MultiStepForm",
@@ -25,8 +26,8 @@ const meta: Meta<typeof FormBuilder> = {
     liveValidate: { control: "boolean" },
     renderers: { control: "object" },
   },
-  render: function Render(args) {
-    const [{ value, renderers: currentRenderers }, updateArgs] = useArgs();
+  render: function Render(args: StoryObj<typeof FormBuilder>["args"]) {
+    const [{ value }, updateArgs] = useArgs();
     const [currentStep, setCurrentStep] = useState(0); // State to manage current step
 
     const handleChange = (newValue: object) => {
@@ -42,158 +43,162 @@ const meta: Meta<typeof FormBuilder> = {
     };
 
     // Define steps and their corresponding form sections
-    const steps = [
-      {
-        title: "Job location",
-        document: parse({
-          type: "form",
+    const steps = React.useMemo(
+      () => [
+        {
           title: "Job location",
-          children: [
-            {
-              type: "text-field",
-              label: "Location",
-              dataPath: ".jobLocation.location",
-              validate: { required: true, type: "string" },
-              description: "city, area...",
-            } as BuilderNodeData,
-            {
-              type: "fieldRow",
-              children: [
-                {
-                  type: "button",
-                  label: "Manchester",
-                  dataPath: ".jobLocation.suggestions.manchester",
-                } as BuilderNodeData,
-                {
-                  type: "button",
-                  label: "Liverpool",
-                  dataPath: ".jobLocation.suggestions.liverpool",
-                } as BuilderNodeData,
-                {
-                  type: "button",
-                  label: "Leeds",
-                  dataPath: ".jobLocation.suggestions.leeds",
-                } as BuilderNodeData,
-                {
-                  type: "button",
-                  label: "London",
-                  dataPath: ".jobLocation.suggestions.london",
-                } as BuilderNodeData,
-                {
-                  type: "button",
-                  label: "Newcastle",
-                  dataPath: ".jobLocation.suggestions.newcastle",
-                } as BuilderNodeData,
-              ],
-            } as BuilderNodeData,
-          ],
-        }) as unknown as BuilderNode<LocalFormBuilderNodeData>,
-      },
-      {
-        title: "Job position",
-        document: parse({
-          type: "form",
+          document: parse({
+            type: "form",
+            title: "Job location",
+            children: [
+              {
+                type: "text-field",
+                label: "Location",
+                dataPath: ".jobLocation.location",
+                validate: { required: true, type: "string" },
+                description: "city, area...",
+              } as BuilderNodeData,
+              {
+                type: "fieldRow",
+                children: [
+                  {
+                    type: "button",
+                    label: "Manchester",
+                    dataPath: ".jobLocation.suggestions.manchester",
+                  } as BuilderNodeData,
+                  {
+                    type: "button",
+                    label: "Liverpool",
+                    dataPath: ".jobLocation.suggestions.liverpool",
+                  } as BuilderNodeData,
+                  {
+                    type: "button",
+                    label: "Leeds",
+                    dataPath: ".jobLocation.suggestions.leeds",
+                  } as BuilderNodeData,
+                  {
+                    type: "button",
+                    label: "London",
+                    dataPath: ".jobLocation.suggestions.london",
+                  } as BuilderNodeData,
+                  {
+                    type: "button",
+                    label: "Newcastle",
+                    dataPath: ".jobLocation.suggestions.newcastle",
+                  } as BuilderNodeData,
+                ],
+              } as BuilderNodeData,
+            ],
+          }) as unknown as BuilderNode<LocalFormBuilderNodeData>,
+        },
+        {
           title: "Job position",
-          children: [
-            {
-              type: "text-field",
-              label: "Roles",
-              dataPath: ".jobPosition.roles",
-              validate: { required: true, type: "string" },
-              description: "job title, position",
-            } as BuilderNodeData,
-            {
-              type: "radio-group",
-              label: "Suggestions",
-              dataPath: ".jobPosition.suggestions",
-              options: [
-                {
-                  label: "360 Operator",
-                  value: "360_operator",
-                  description:
-                    "Operate and maintain 360 excavator for construction projects.",
-                  hourlyRate: "from £30 per hour",
-                },
-                {
-                  label: "Site Manager",
-                  value: "site_manager",
-                  description:
-                    "Manage project plans, budgets, and schedules throughout project lifecycle.",
-                  hourlyRate: "from £32 per hour",
-                },
-                {
-                  label: "Project Manager",
-                  value: "project_manager",
-                  description:
-                    "Manage construction projects & ensure adherence to plans.",
-                  hourlyRate: "from £42 per hour",
-                },
-                {
-                  label: "Steel Fixer",
-                  value: "steel_fixer",
-                  description:
-                    "Install steel reinforcement bars in concrete structures.",
-                  hourlyRate: "from £22 per hour",
-                },
-              ],
-            } as BuilderNodeData,
-          ],
-        }) as unknown as BuilderNode<LocalFormBuilderNodeData>,
-      },
-      {
-        title: "Personal details",
-        document: parse({
-          type: "form",
+          document: parse({
+            type: "form",
+            title: "Job position",
+            children: [
+              {
+                type: "text-field",
+                label: "Roles",
+                dataPath: ".jobPosition.roles",
+                validate: { required: true, type: "string" },
+                description: "job title, position",
+              } as BuilderNodeData,
+              {
+                type: "radio-group",
+                label: "Suggestions",
+                dataPath: ".jobPosition.suggestions",
+                options: [
+                  {
+                    label: "360 Operator",
+                    value: "360_operator",
+                    description:
+                      "Operate and maintain 360 excavator for construction projects.",
+                    hourlyRate: "from £30 per hour",
+                  },
+                  {
+                    label: "Site Manager",
+                    value: "site_manager",
+                    description:
+                      "Manage project plans, budgets, and schedules throughout project lifecycle.",
+                    hourlyRate: "from £32 per hour",
+                  },
+                  {
+                    label: "Project Manager",
+                    value: "project_manager",
+                    description:
+                      "Manage construction projects & ensure adherence to plans.",
+                    hourlyRate: "from £42 per hour",
+                  },
+                  {
+                    label: "Steel Fixer",
+                    value: "steel_fixer",
+                    description:
+                      "Install steel reinforcement bars in concrete structures.",
+                    hourlyRate: "from £22 per hour",
+                  },
+                ],
+              } as BuilderNodeData,
+            ],
+          }) as unknown as BuilderNode<LocalFormBuilderNodeData>,
+        },
+        {
           title: "Personal details",
-          children: [
-            {
-              type: "text-field",
-              label: "Name",
-              dataPath: ".personalDetails.name",
-              validate: { required: true, type: "string" },
-              description: "e.g. John Smith",
-            } as BuilderNodeData,
-            {
-              type: "text-field",
-              label: "Phone",
-              dataPath: ".personalDetails.phone",
-              inputType: "tel",
-              validate: {
-                required: true,
-                type: "string",
-                pattern: "^[0-9]{10,15}$",
-              },
-              description: "e.g. 07991123456",
-            } as BuilderNodeData,
-            {
-              type: "file-upload",
-              label: "Certification (optional)",
-              dataPath: ".personalDetails.certification",
-            } as BuilderNodeData,
-          ],
-        }) as unknown as BuilderNode<LocalFormBuilderNodeData>,
-      },
-      {
-        title: "Application Received",
-        document: parse({
-          type: "form",
+          document: parse({
+            type: "form",
+            title: "Personal details",
+            children: [
+              {
+                type: "text-field",
+                label: "Name",
+                dataPath: ".personalDetails.name",
+                validate: { required: true, type: "string" },
+                description: "e.g. John Smith",
+              } as BuilderNodeData,
+              {
+                type: "text-field",
+                label: "Phone",
+                dataPath: ".personalDetails.phone",
+                inputType: "tel",
+                validate: {
+                  required: true,
+                  type: "string",
+                  pattern: "^[0-9]{10,15}$",
+                },
+                description: "e.g. 07991123456",
+              } as BuilderNodeData,
+              {
+                type: "file-upload",
+                label: "Certification (optional)",
+                dataPath: ".personalDetails.certification",
+              } as BuilderNodeData,
+            ],
+          }) as unknown as BuilderNode<LocalFormBuilderNodeData>,
+        },
+        {
           title: "Application Received",
-          children: [
-            {
-              type: "success-message",
-              label: "We've received your application!",
-              description: "We will process it and reach out to you in a days.",
-            } as BuilderNodeData,
-          ],
-        }) as unknown as BuilderNode<LocalFormBuilderNodeData>,
-      },
-    ];
+          document: parse({
+            type: "form",
+            title: "Application Received",
+            children: [
+              {
+                type: "success-message",
+                label: "We've received your application!",
+                description:
+                  "We will process it and reach out to you in a days.",
+              } as BuilderNodeData,
+            ],
+          }) as unknown as BuilderNode<LocalFormBuilderNodeData>,
+        },
+      ],
+      []
+    );
 
     const currentDocument = steps[currentStep].document;
 
     // Custom renderers for multi-step form
     const multiStepRenderers: RenderersMap = {
-      ...currentRenderers, // Inherit existing renderers
+      ...advancedRenderers, // Inherit existing renderers from advancedForm
       form: ({ node, context: { core } }) => {
         return (
           <fieldset className={styles.fieldset}>
@@ -238,7 +243,6 @@ const meta: Meta<typeof FormBuilder> = {
         );
       },
       button: ({ node }) => {
-        // Removed $formField as it's not directly used
         const handleClick = () => {
           if (node.data.dataPath.includes(".jobLocation.suggestions")) {
             const currentLocations = (
@@ -253,7 +257,7 @@ const meta: Meta<typeof FormBuilder> = {
                 value: {
                   ...value,
                   jobLocation: {
-                    ...((value as any)?.jobLocation || {}),
+                    ...((value as { jobLocation?: object })?.jobLocation || {}),
                     location: [...currentLocations, newLocation].join(", "),
                   },
                 },
@@ -443,7 +447,7 @@ const meta: Meta<typeof FormBuilder> = {
                   fill="#6A38ED"
                 />
                 <path
-                  d="M10 40C12.7614 40 15 42.2386 15 45C15 47.7614 12.7614 50 10 50C7.23858 50 5 47.7614 5 45C5 42.2386 7.23858 40 10 40Z"
+                  d="M10 40C12.7614 40 15 42.2386 15 45C15 47.7614 12.7614 50 10 50C7.23858 50 5 47.2386 5 45C5 42.2386 7.23858 40 10 40Z"
                   fill="#6A38ED"
                 />
                 <path
@@ -455,7 +459,7 @@ const meta: Meta<typeof FormBuilder> = {
                   fill="#6A38ED"
                 />
                 <path
-                  d="M30 40C32.7614 40 35 42.2386 35 45C35 47.7614 32.7614 50 30 50C27.2386 50 25 47.7614 25 45C25 42.2386 27.2386 40 30 40Z"
+                  d="M30 40C32.7614 40 35 42.2386 35 45C35 47.7614 32.7614 50 30 50C27.2386 50 25 47.2386 25 45C25 42.2386 27.2386 40 30 40Z"
                   fill="#6A38ED"
                 />
                 <path
@@ -494,6 +498,12 @@ const meta: Meta<typeof FormBuilder> = {
             <div
               key={index}
               className={`${styles.step} ${index === currentStep ? styles.activeStep : ""} ${index < currentStep ? styles.completedStep : ""}`}
+              onClick={() => {
+                if (index < currentStep) {
+                  setCurrentStep(index);
+                }
+              }}
+              style={{ cursor: index < currentStep ? "pointer" : "default" }}
             >
               {index < currentStep ? (
                 <FaCheckCircle className={styles.completedIcon} />
@@ -536,10 +546,6 @@ export const MultiStepForm: Story = {
         certification: "",
       },
     },
-    document: parse({
-      type: "form",
-      title: "Initial Form",
-    }) as unknown as BuilderNode<LocalFormBuilderNodeData>, // Placeholder document
     renderers: {}, // Will be overridden by multiStepRenderers in render function
     liveValidate: true,
   },

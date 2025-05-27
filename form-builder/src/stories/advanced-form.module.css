@@ -15,6 +15,9 @@
   color: #333;
   padding: 0 10px;
   margin-left: -10px;
+  font-family:
+    "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; /* Explicitly set font for legend */
+  margin-bottom: 20px; /* Add some space below the legend */
 }
 
 .fieldList > * {
@@ -38,6 +41,7 @@
 .field input[type="email"],
 .field input[type="number"],
 .field input[type="password"],
+.field input[type="tel"], /* Add tel input type */
 .field select {
   padding: 10px 12px;
   border: 1px solid #d0d0d0;
@@ -49,6 +53,7 @@
     box-shadow 0.2s ease-in-out;
   width: 100%;
   box-sizing: border-box; /* Padding'in genişliği etkilememesi için */
+  height: 40px; /* Set a fixed height for consistency */
 }
 
 .field input:focus,
@@ -268,8 +273,8 @@
   content: "";
   position: absolute;
   top: 20px;
-  right: -50px; /* Adjust as needed for spacing */
-  width: 100px; /* Length of the line */
+  right: calc(-50% + 15px); /* Adjust as needed for spacing */
+  width: calc(100% - 30px); /* Length of the line */
   height: 2px;
   background-color: #e0e0e0;
   z-index: -1;
@@ -287,11 +292,14 @@
   font-size: 1rem;
   margin-bottom: 8px;
   transition: background-color 0.3s ease;
+  font-family:
+    "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; /* Set font for step number */
 }
 
 .stepTitle {
   font-size: 0.9rem;
   text-align: center;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .activeStep .stepNumber {
