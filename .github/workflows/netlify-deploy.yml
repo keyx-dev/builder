@@ -14,15 +14,16 @@ jobs:
       # 1. Depoyu checkout et
       - uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
       # 2. Node.js ortamını kur (pnpm için)
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           cache: "pnpm"
-
-      # 3. pnpm'i kur
-      - name: Install pnpm
-        run: npm install -g pnpm@latest
 
       # 4. pnpm-workspace.yaml dosyasını oluştur
       - name: Create pnpm-workspace.yaml
