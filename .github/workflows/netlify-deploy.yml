@@ -22,8 +22,6 @@ jobs:
       # 2. Node.js ortamını kur (pnpm için)
       - name: Setup Node.js
         uses: actions/setup-node@v4
-        with:
-          cache: "pnpm"
 
       # 4. pnpm-workspace.yaml dosyasını oluştur
       - name: Create pnpm-workspace.yaml
@@ -47,7 +45,7 @@ jobs:
 
       # 6. pnpm install çalıştır
       - name: Install dependencies
-        run: pnpm install --no-lockfile
+        run: pnpm install
 
       # 7. Storybook'u build et
       - name: Build Storybook
