@@ -18,12 +18,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "18" # Kullanmak istediğiniz Node.js sürümünü belirtin
-          cache: "pnpm" # pnpm bağımlılıklarını önbelleğe alır
+          cache: "pnpm"
 
       # 3. pnpm'i kur
       - name: Install pnpm
-        run: npm install -g pnpm@8.15.1 # İstenilen pnpm sürümünü belirtin
+        run: npm install -g pnpm@latest
 
       # 4. pnpm-workspace.yaml dosyasını oluştur
       - name: Create pnpm-workspace.yaml
