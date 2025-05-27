@@ -34,7 +34,7 @@ jobs:
       - name: Create package.json
         run: |
           if [ ! -f package.json ]; then
-            echo -e "{}" > package.json
+            echo -e "{ \"scripts\": { \"build\": \"cd form-builder && pnpm build-storybook\" } }" > package.json
           fi
 
       # 8. Netlify'ye deploy et
@@ -46,5 +46,5 @@ jobs:
           NETLIFY_DEPLOY_TO_PROD: true
           build_directory: form-builder/storybook-static # Statik sitenin klasörü
           install_command: pnpm install
-          build_command: cd form-builder && pnpm build-storybook
+          build_command: pnpm build
           monorepo_package: form-builder # Monorepo'da hangi paketi deploy edeceğiz
