@@ -37,14 +37,6 @@ jobs:
             echo -e "{}" > package.json
           fi
 
-      # 6. pnpm install çalıştır
-      - name: Install dependencies
-        run: pnpm install
-
-      # 7. Storybook'u build et
-      - name: Build Storybook
-        run: cd form-builder && pnpm build-storybook
-
       # 8. Netlify'ye deploy et
       - uses: jsmrcaga/action-netlify-deploy@master
         with:
@@ -52,6 +44,7 @@ jobs:
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
           NETLIFY_DEPLOY_MESSAGE: "Deploy from push ${GITHUB_SHA}"
           NETLIFY_DEPLOY_TO_PROD: true
-          build_command: pnpm build-storybook # Storybook'u build etme komutu
           build_directory: form-builder/storybook-static # Statik sitenin klasörü
-          monorepo_package: form-builder # Monorepo paket adı
+          install_command: "pnpm install"
+          build_command: "pnpm build-storybook"
+          monorepo_package: "form-builder" # Monorepo'da hangi paketi deploy edeceğiz
