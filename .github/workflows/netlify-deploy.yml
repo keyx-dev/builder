@@ -45,6 +45,6 @@ jobs:
           NETLIFY_DEPLOY_MESSAGE: "Deploy from push ${GITHUB_SHA}"
           NETLIFY_DEPLOY_TO_PROD: true
           build_directory: form-builder/storybook-static # Statik sitenin klasörü
-          install_command: "pnpm install"
-          build_command: "pnpm build-storybook"
-          monorepo_package: "form-builder" # Monorepo'da hangi paketi deploy edeceğiz
+          install_command: pnpm install
+          build_command: cd form-builder && pnpm build-storybook
+          monorepo_package: form-builder # Monorepo'da hangi paketi deploy edeceğiz
