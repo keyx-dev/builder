@@ -1,0 +1,58 @@
+name: "Netlify Deploy"
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: "Deploy"
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Depoyu checkout et
+      - uses: actions/checkout@v4
+
+      # 2. Node.js ortamını kur (pnpm için)
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18" # Kullanmak istediğiniz Node.js sürümünü belirtin
+          cache: "pnpm" # pnpm bağımlılıklarını önbelleğe alır
+
+      # 3. pnpm'i kur
+      - name: Install pnpm
+
+      # 4. pnpm-workspace.yaml dosyasını oluştur
+      - name: Create pnpm-workspace.yaml
+        run: |
+          cat > pnpm-workspace.yaml << EOL
+          packages:
+            - core
+            - form-builder
+          EOL
+
+      # 5. package.json dosyasını oluştur
+      - name: Create package.json
+        run: |
+          cat > package.json << EOL
+          {}
+          EOL
+
+      # 6. pnpm install çalıştır
+      - name: Install dependencies
+        run: pnpm install
+
+      # 7. Storybook'u build et
+      - name: Build Storybook
+        run: cd form-builder && pnpm build-storybook
+
+      # 8. Netlify'ye deploy et
+      - uses: jsmrcaga/action-netlify-deploy@master
+        with:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          NETLIFY_DEPLOY_MESSAGE: "Prod deploy v${{ github.ref }}"
+          NETLIFY_DEPLOY_TO_PROD: true
+          build_directory: form-builder/storybook-static # Statik sitenin klasörü

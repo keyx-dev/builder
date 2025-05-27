@@ -4,7 +4,6 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "preinstall": "./preinstall.sh",
     "start": "storybook dev -p 6007",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
